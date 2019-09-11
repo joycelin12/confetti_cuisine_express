@@ -4,7 +4,39 @@ const express = require("express"), //require express
 	app = express(), //instantiate
 	homeController = require("./controllers/homeController"),
 	errorController = require("./controllers/errorController"),
-	layouts = require("express-ejs-layouts"); //require express-ejs-layouts module
+	layouts = require("express-ejs-layouts"), //require express-ejs-layouts module
+        MongoDB = require("mongodb").MongoClient, //require mongodb module
+	dbURL = "mongodb://localhost:27017",
+	dbName= "recipe_db";
+
+MongoDB.connect(dbURL, (error, client) => { //set up a connection to your local database server
+	if (error) throw error;
+
+	let db = client.db(dbName); //get the recipe_db database from connection to mongoDB server
+	db.collection("contacts")
+	  .find()
+	  .toArray((error, data) => { //find all records in contacts collection 
+
+             if (error) throw error;
+		  console.log(data); // print results to console
+	  });
+
+
+	db.collection("contacts")
+  .insert({
+
+    name: "Freddie Mercury",  //inser new item into db
+    email: "fred@queen.com"	  
+  }, (error, db) => {
+    if(error) throw error;
+	  console.log(db); //log resulting errors or save item
+
+  });
+
+
+    
+});
+
 
 
 app.set("port", process.env.PORT || 3000);
