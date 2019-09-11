@@ -5,7 +5,68 @@ const express = require("express"), //require express
 	homeController = require("./controllers/homeController"),
 	errorController = require("./controllers/errorController"),
 	layouts = require("express-ejs-layouts"), //require express-ejs-layouts module
-        MongoDB = require("mongodb").MongoClient, //require mongodb module
+	mongoose = require("mongoose"); // require mongoose
+               mongoose.connect(
+
+         "mongodb://localhost:27017/recipe_db", //set up connection to db
+		{useNewUrlParser: true}
+	);
+
+       const  db = mongoose.connection; //assign db variable    
+        db.once("open", () => {
+           console.log("Successfully connected to MongoDB using Mongoose!");
+
+             });
+ 
+        const Subscriber = require("./models/subscriber");
+        
+         var myQuery = Subscriber.findOne({
+            name: "Jon Wexler"
+	 }).where("email", /wexler/);
+         myQuery.exec((error, data) => {
+
+                 if (data) console.log(data.name); //runs a query with a callback function to handle errors and data
+
+	 });
+
+
+
+      /*
+       const subscriberSchema = mongoose.Schema({ //create a new schema with mongoose.schema
+
+          name: String, //add schema properties
+	  email:String,
+	  zipCode : Number      
+       });
+
+        const Subscriber= mongoose.model("Subscriber", subscriberSchema);
+     
+
+       var subscriber1 = new Subscriber({
+		name: "Jon Wexler",
+	       email:"jon@jonwexler.com"
+       }); //instantiate a new subscriber
+
+       subscriber1.save((error, savedDocument) => { // save a subscriber to db
+
+           if (error) console.log(error); //pass potential errors to next middle ware function
+	       console.log(savedDocument);  //log saved document
+       });
+
+      Subscriber.create({
+
+		name: "Jon Wexler",
+	        email: "jon@jonwexler.com"
+      },
+
+        function (error, savedDocument) {//create and save a subscriber in a single step
+           if (error) console.log(error);
+	   console.log(savedDocument);	
+	}
+      ); */
+        
+  
+	/* MongoDB = require("mongodb").MongoClient, //require mongodb module
 	dbURL = "mongodb://localhost:27017",
 	dbName= "recipe_db";
 
@@ -35,7 +96,7 @@ MongoDB.connect(dbURL, (error, client) => { //set up a connection to your local 
 
 
     
-});
+}); */
 
 
 
