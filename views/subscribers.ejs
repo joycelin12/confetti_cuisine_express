@@ -1,0 +1,13 @@
+<div class="container">
+  <div class="col-sm-6">
+    <img src="images/fruit.jpg" alt="">
+  </div>
+  <div class="col-sm-6">
+    <h1 class="title">Subscribers Only</h1>
+    <h1>Subscribers</h1>
+    <% subscribers.forEach(s => { %> 
+    <p><%= s.name %></p>
+    <p><%= s.email %></p>
+       <% }); %>
+  </div>
+</div>

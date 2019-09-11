@@ -19,6 +19,7 @@ const express = require("express"), //require express
              });
  
         const Subscriber = require("./models/subscriber");
+        const subscribersController = require("./controllers/subscribersController.js");
         
          var myQuery = Subscriber.findOne({
             name: "Jon Wexler"
@@ -29,8 +30,7 @@ const express = require("express"), //require express
 
 	 });
 
-
-
+        
       /*
        const subscriberSchema = mongoose.Schema({ //create a new schema with mongoose.schema
 
@@ -119,6 +119,14 @@ app.get("/", (req, res) => { // create a route for homepage
    res.render("index");
 
 });
+
+app.get("/subscribers", subscribersController.getAllSubscribers, (req, res, next) => {  //pass reqyest to getAllSubscribers function.
+
+              console.log(req.data);  //log data from request object
+		// res.send(req.data); //render data on browser window
+		 res.render("subscribers", {subscribers:req.data}); //render a view subscribers and pass from db to view
+	 });
+
 
 app.get("/courses", homeController.showCourses);
 app.get("/contact", homeController.showSignup);
