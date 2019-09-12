@@ -6,6 +6,8 @@ const express = require("express"), //require express
 	errorController = require("./controllers/errorController"),
 	layouts = require("express-ejs-layouts"), //require express-ejs-layouts module
 	mongoose = require("mongoose"); // require mongoose
+        mongoose.Promise = global.Promise; //using promise with Mongoose
+   
                mongoose.connect(
 
          "mongodb://localhost:27017/recipe_db", //set up connection to db
