@@ -129,8 +129,12 @@ app.get("/subscribers", subscribersController.getAllSubscribers, (req, res, next
 
 
 app.get("/courses", homeController.showCourses);
-app.get("/contact", homeController.showSignup);
-app.get("/contact", homeController.postedSignUpForm); //add routes for courses page, contact page, and contact form submission
+//app.get("/contact", homeController.showSignup);
+//app.get("/contact", homeController.postedSignUpForm); //add routes for courses page, contact page, and contact form submission
+
+app.get("/contact", subscribersController.getSubscriptionPage); //add get route for subscription page
+app.post("/subscribe", subscribersController.saveSubscriber); //add post route to handle subscription data
+
 
 app.use(errorController.pageNotFoundError);
 app.use(errorController.internalServerError); //add error handlers as middleware functions.

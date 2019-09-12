@@ -11,6 +11,24 @@ exports.getAllSubscribers = (req, res, next) => {  //export getAllSubscribers to
   });
 };
 
+exports.getSubscriptionPage = (req, res) => { //add an action to render contact page
+   res.render("contact");
+};
+
+exports.saveSubscriber = (req,res) => {    //add an action to save subscribers
+     let newSubscriber = new Subscriber({
+
+          name: req.body.name,
+	  email: req.body.email,
+	  zipCode: req.body.zipCode   
+     });
+
+     newSubscriber.save((error, result) => {  //save a new subscriber
+           if(error) res.send(error);
+	     res.render("thanks");
+     });
+};
+
 
 
 
