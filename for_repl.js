@@ -28,3 +28,26 @@ Subscriber.findOne({
      subscriber = result;  //search for document u created
 	console.log(subscriber.getInfo()); //log subscriber record
 });
+
+//17.7 testing model associations using REPL in terminal
+
+const Course = require("./models/course"); //require course model
+  var testCourse, testSubscriber; //set up two variables outside the promise  chain
+   Course.create({
+
+	title: "Tomato Land",
+        description: "Locally farmed tomatoes only",
+	zipCode: 12345,
+	items: ["cherry", "heirloom"]   
+   }).then(course => testCourse = course); //create a new course instance
+   
+     Subscriber.findOne({}). then(
+	subscriber => testSubscriber = subscriber //find a subscriber
+     );
+
+     testSubscriber.courses.push(testCourse); //push the testCourse course into the courses array of testSubscriber
+     testSubscriber.save(); // save the model instance again
+     Subscriber.populate(testSubscriber, "courses").then(subscriber => //use populate on model.
+	console.log(subscriber)
+     );
+     

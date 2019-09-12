@@ -18,7 +18,11 @@ const mongoose = require("mongoose"),
 		type:Number,
 		min: [10000, "Zip code too short"],
 		max: 99999
-	}
+	},
+	courses: [{
+                type: mongoose.Schema.Types.ObjectId,
+		ref: "Course"
+		}]	//square brackets means an array of multiple referenced objects
 
 
 	});
