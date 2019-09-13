@@ -67,4 +67,44 @@ const mongoose = require("mongoose"),
 			});
 		})
 		.then(subscriber => console.log(subscriber));
-	        	       
+
+
+var testUser;
+User.create({
+
+    name:{
+       first: "Jon",
+       last: "Wexler"	    
+    },
+    email: "jon@jonwexler.com",
+    password: "pass123"	
+})
+ .then(user => testUser = user)
+ .catch(error => console.log(error.message)); //create a new user
+
+const User = require("./models/user");
+ 
+var testUser;
+User.create({
+
+    name:{
+       first: "Jon",
+       last: "Wexler"	    
+    },
+    email: "jon@jonwexler.com",
+    password: "pass123"	
+})
+ .then(user => testUser = user;
+               return Subscriber.findOne({
+                email: user.email
+	       }); // find subscriber with user's email
+ )
+ .then(subscriber => {
+
+    testUser.subscribedAccount = subscriber; //connect a subscriber and user
+	 testUser.save().then(user => console.log("user updated"));
+
+
+ })
+ .catch(error => console.log(error.message)); //create a new user
+	
