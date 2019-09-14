@@ -17,10 +17,15 @@ var courses = [
   }
 ];
 
-exports.showCourses = (req, res) => {
-  res.render("courses", {
-    offeredCourses: courses
-  });
+
+module.exports = {  //export object literal with all controller actions
+	showCourses: (req, res) => {
+           res.render("courses", {
+             offeredCourses: courses
+	   });
+	}
+
+
 };
 
 exports.showSignup = (req, res) => {

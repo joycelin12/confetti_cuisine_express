@@ -22,7 +22,8 @@ const express = require("express"), //require express
  
         const Subscriber = require("./models/subscriber");
         const subscribersController = require("./controllers/subscribersController.js");
-        
+        const usersController = require("./controllers/usersController.js"); //require usersController
+
          var myQuery = Subscriber.findOne({
             name: "Jon Wexler"
 	 }).where("email", /wexler/);
@@ -136,6 +137,9 @@ app.get("/courses", homeController.showCourses);
 
 app.get("/contact", subscribersController.getSubscriptionPage); //add get route for subscription page
 app.post("/subscribe", subscribersController.saveSubscriber); //add post route to handle subscription data
+app.get("/users", usersController.index, usersController.indexView);	// create index route
+
+
 
 
 app.use(errorController.pageNotFoundError);

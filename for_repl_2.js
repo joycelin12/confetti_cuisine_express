@@ -91,14 +91,15 @@ User.create({
        first: "Jon",
        last: "Wexler"	    
     },
-    email: "jon@jonwexler.com",
+    email: "jo777n@jonw.com",
     password: "pass123"	
 })
- .then(user => testUser = user;
+ .then(user =>  { 
+	        testUser = user;
                return Subscriber.findOne({
                 email: user.email
 	       }); // find subscriber with user's email
- )
+ })
  .then(subscriber => {
 
     testUser.subscribedAccount = subscriber; //connect a subscriber and user
