@@ -1,5 +1,6 @@
 "use strict";
 
+const Subscriber = require("./subscriber");
 const mongoose = require("mongoose"),
 	{Schema} = mongoose,
 
@@ -42,5 +43,28 @@ userSchema.virtual("fullName")
              return `${this.name.first} ${this.name.last}`;
 
 	  });
+
+userSchema.pre("save", function(next) { //set up the pre ('save') hook
+
+	let user = this;  //use function keyword in call back
+	if(user.subscribedAccount === undefined) {
+   Subscriber.findOne({
+              email: user.email
+   })         //query for single subscriber
+	     .then(subscriber => {
+                  user.subscribedAccount = subscriber; //connect user with subscriber account;
+		     next();
+	     })
+	     .catch(error => {
+
+                   console.log(`Error in connecting subscriber: ${error.message}`);
+		     next(error); //pass any errors to next middleware
+	     });
+
+	} else {
+            next(); //call next functionif user already has an association
+	}
+
+});
 
 module.exports = mongoose.model("User", userSchema);

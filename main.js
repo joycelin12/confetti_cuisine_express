@@ -5,6 +5,7 @@ const express = require("express"), //require express
 	homeController = require("./controllers/homeController"),
 	errorController = require("./controllers/errorController"),
 	layouts = require("express-ejs-layouts"), //require express-ejs-layouts module
+	router  = express.Router(),  //add router object
 	mongoose = require("mongoose"); // require mongoose
         mongoose.Promise = global.Promise; //using promise with Mongoose
    
@@ -13,7 +14,7 @@ const express = require("express"), //require express
          "mongodb://localhost:27017/recipe_db", //set up connection to db
 		{useNewUrlParser: true}
 	);
-
+       app.use("/", router);
        const  db = mongoose.connection; //assign db variable    
         db.once("open", () => {
            console.log("Successfully connected to MongoDB using Mongoose!");
@@ -139,7 +140,9 @@ app.get("/contact", subscribersController.getSubscriptionPage); //add get route 
 app.post("/subscribe", subscribersController.saveSubscriber); //add post route to handle subscription data
 app.get("/users", usersController.index, usersController.indexView);	// create index route
 
-
+router.get("/users/new", usersController.new);
+router.post("/users/create", usersController.create, usersController.redirectView);
+router.get("/users/:id", usersController.show, usersController.showView);
 
 
 app.use(errorController.pageNotFoundError);
