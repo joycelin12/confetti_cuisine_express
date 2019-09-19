@@ -91,6 +91,60 @@ module.exports = {
 	},
 	showView: (req, res) => {
             res.render("users/show"); //render show view
-	}
-	
+	},
+	edit: (req, res, next) => { //add the edit action
+             let userId = req.params.id;
+		User.findById(userId) //use findById to locate a user in the database by their ID
+		    .then(user => {
+			    res.render("users/edit", {
+				user:user
+			    });	//render user edit page for a specific user in the database
+		    	})
+		    .catch(error => {
+			console.log(`Error fetching user by ID:  ${error.message}`);
+			    next(error);
+		    });
+	},
+	update: (req, res, next) => { // add update action
+		let userId = req.params.id,
+		userParams = {
+			name : {
+				first: req.body.first,
+				last: req.body.last
+			},
+			email: req.body.email,
+			password: req.body.password,
+			zipCode: req.body.zipCode
+		}; // Collect user parameters from request.
+
+		User.findByIdAndUpdate(userId, {
+			$set: userParams	
+		}) //use findbyidandupdate to locate a user by id and update the document record in one command
+
+		    .then(user => {
+		       res.locals.redirect =`/users/${userId}`;
+		       res.locals.user = user;
+		       next();	    
+		    })
+		    .catch(error => {
+                      console.log(`Error updating user by ID: ${error.message}`);
+		      next(error);	    
+		    });
+	},
+	delete: (req, res, next) => {
+
+          let userId = req.params.id;
+	  User.findByIdAndRemove(userId)
+		.then(() =>{
+                  res.locals.redirect ="/users"; //deleting a user with findbyidandremove method
+		  next();	
+
+		})
+		.catch(error => {
+                   console.log(`Error deleting user by ID: ${error.message}`);
+			next();
+		
+	        });
+	}	
+   
 };

@@ -14,8 +14,7 @@ const express = require("express"), //require express
          "mongodb://localhost:27017/recipe_db", //set up connection to db
 		{useNewUrlParser: true}
 	);
-       app.use("/", router);
-       const  db = mongoose.connection; //assign db variable    
+        const  db = mongoose.connection; //assign db variable    
         db.once("open", () => {
            console.log("Successfully connected to MongoDB using Mongoose!");
 
@@ -106,25 +105,35 @@ MongoDB.connect(dbURL, (error, client) => { //set up a connection to your local 
 
 app.set("port", process.env.PORT || 3000);
 app.set("view engine", "ejs"); //set application to use ejs
-app.use(layouts); // set application to use layout module
+app.use("/", router);
+      
+router.use(layouts); // set application to use layout module
 
 
-app.use(
+router.use(
    express.urlencoded({  //tell express.js app to use body parser for processing
       extended:false     //URL-encoded and json parameters
    })
 );
 
-app.use(express.json());
-app.use(express.static("public"));
+router.use(express.json());
+router.use(express.static("public"));
+router.get("/", homeController.index);
 
-app.get("/", (req, res) => { // create a route for homepage
+//app.get("/", (req, res) => { // create a route for homepage
 
-   res.render("index");
+  // res.render("index");
 
-});
+//});
 
-app.get("/subscribers", subscribersController.getAllSubscribers, (req, res, next) => {  //pass reqyest to getAllSubscribers function.
+//adding method override to put in the put request 
+const methodOverride = require("method-override"); //require the method override module
+router.use(methodOverride("_method", {
+	methods: ["POST", "GET"]
+})); //configure the application router to use methodOverride as middleware.
+
+
+router.get("/subscribers", subscribersController.getAllSubscribers, (req, res, next) => {  //pass reqyest to getAllSubscribers function.
 
               console.log(req.data);  //log data from request object
 		// res.send(req.data); //render data on browser window
@@ -132,21 +141,27 @@ app.get("/subscribers", subscribersController.getAllSubscribers, (req, res, next
 	 });
 
 
-app.get("/courses", homeController.showCourses);
+router.get("/courses", homeController.showCourses);
 //app.get("/contact", homeController.showSignup);
 //app.get("/contact", homeController.postedSignUpForm); //add routes for courses page, contact page, and contact form submission
 
-app.get("/contact", subscribersController.getSubscriptionPage); //add get route for subscription page
-app.post("/subscribe", subscribersController.saveSubscriber); //add post route to handle subscription data
-app.get("/users", usersController.index, usersController.indexView);	// create index route
+router.get("/contact", subscribersController.getSubscriptionPage); //add get route for subscription page
+router.post("/subscribe", subscribersController.saveSubscriber); //add post route to handle subscription data
+router.get("/users", usersController.index, usersController.indexView);	// create index route
 
 router.get("/users/new", usersController.new);
 router.post("/users/create", usersController.create, usersController.redirectView);
 router.get("/users/:id", usersController.show, usersController.showView);
 
+//adding edit and update routes
+router.get("/users/:id/edit", usersController.edit); //add routes to handle viewing
+router.put("/users/:id/update", usersController.update, usersController.redirectView); //process data from edit form, and display user show page.
 
-app.use(errorController.pageNotFoundError);
-app.use(errorController.internalServerError); //add error handlers as middleware functions.
+//deleting user
+router.delete("/users/:id/delete", usersController.delete, usersController.redirectView); 
+
+router.use(errorController.pageNotFoundError);
+router.use(errorController.internalServerError); //add error handlers as middleware functions.
 
 
 

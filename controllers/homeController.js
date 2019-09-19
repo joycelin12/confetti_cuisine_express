@@ -23,7 +23,11 @@ module.exports = {  //export object literal with all controller actions
            res.render("courses", {
              offeredCourses: courses
 	   });
-	}
+	},
+	index: (req, res) => {
+          res.render("index");
+        }
+
 
 
 };
