@@ -8,24 +8,4 @@
     <p> If you want to see a new course, click <a href="/courses.html">the courses page</a> and explore!</p>
     <p> When you see a course you like you can <a href="/contact.html">contact us to join! </a> Soon you'll be cooking in your own home.</p>
   </div>
-   <h2>Users Table</h2>
-   <table class = "table">
-      <thead>
-       <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Zip Code</th>
-       </tr>
-      </thead>
-     <tbody>
-       <% users.forEach(user => {%> 
-        <tr>
-         <td><%= user.fullName%></td>
-          <td><%= user.email %></td>
-          <td><%= user.zipCode></td>
-       </tr>
-      <%}); %>
-    </tbody>
-    </table>
-
 </div>
