@@ -1,8 +1,10 @@
 "use strict";
 
 const mongoose = require("mongoose"),
+	 { Schema } = mongoose;
 
-	subscriberSchema = new mongoose.Schema({   // define a subscriberschema to contain name email and zipcode properties
+
+    var	subscriberSchema = new Schema({   // define a subscriberschema to contain name email and zipcode properties
 
 	name: {
 		type: String,
@@ -25,7 +27,11 @@ const mongoose = require("mongoose"),
 		}]	//square brackets means an array of multiple referenced objects
 
 
-	});
+	},
+         {
+          timestamps: true
+         }
+);
 
 
 //add an instance method to get full name of subscriber
