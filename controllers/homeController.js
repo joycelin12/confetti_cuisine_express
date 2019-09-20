@@ -26,7 +26,11 @@ module.exports = {  //export object literal with all controller actions
 	},
 	index: (req, res) => {
           res.render("index");
-        }
+        },
+	getSubscriptionPage: (req, res) => {
+   		 res.render("contact");
+	 }
+
 
 
 
