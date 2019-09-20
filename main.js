@@ -6,6 +6,9 @@ const express = require("express"), //require express
 	errorController = require("./controllers/errorController"),
 	layouts = require("express-ejs-layouts"), //require express-ejs-layouts module
 	router  = express.Router(),  //add router object
+	expressSession = require("express-session"), //require the 3 modules
+        cookieParser = require("cookie-parser"),
+	connectFlash = require("connect-flash"),
 	mongoose = require("mongoose"); // require mongoose
         mongoose.Promise = global.Promise; //using promise with Mongoose
    
@@ -122,6 +125,23 @@ router.use(
 router.use(express.json());
 router.use(express.static("public"));
 router.get("/", homeController.index);
+
+//configure your express.js application to use cookie-parse
+router.use(cookieParser("secret_passcode"));
+router.use(expressSession({
+	secret: "secret_passcode",
+	cookie: {
+		maxAge: 4000000
+	},
+	resave: false,
+	saveUninitialized: false
+})); //configure express-session to use cookie-parse
+router.use(connectFlash()); //configure app to use connect-flash as middleware
+
+router.use((req, res, next) => {
+	res.locals.flashMessages = req.flash(); //assign flash messages to the local flashMessages variable on the response object
+	next();
+});
 
 //app.get("/", (req, res) => { // create a route for homepage
 

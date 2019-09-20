@@ -36,13 +36,17 @@ module.exports = {
 	     });
       },
 	indexView: (req, res) => {
-            res.render("users/index"); //render view in separate action
+            res.render("users/index", {
+		    flashMessages: {
+		    	success: "Loaded all users!"
+		    }
+	     }); //render view in separate action
 
 	},
 	new: (req, res) => {
           res.render("users/new"); //add new action to render form
 	},
-	create: (req, res) => {
+	create: (req, res, next) => {
 
            let userParams = { //add create action to save user to database
 		   name: {
@@ -55,6 +59,7 @@ module.exports = {
 	   };
 	   User.create(userParams)
 		.then(user => {
+	            req.flash("success", `${user.fullName}'s account created successfully!`); //respond with success flash message		
                     res.locals.redirect = "/users";
 		    res.locals.user = user;
 		    next();	
@@ -62,7 +67,12 @@ module.exports = {
 		.catch(error => {
 
                    console.log(`Error saving user: ${error.message}`);
-			next(error);
+		   res.locals.redirect = "/users/new";
+		   req.flash(
+                      "error",
+		      `Failed to create user account because: ${error.message}.`
+		   );
+			next();
 		});
 		
 	},
