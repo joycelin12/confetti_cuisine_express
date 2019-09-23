@@ -15,7 +15,9 @@ const express = require("express"), //require express
 	Subscriber = require("./models/subscriber"),
         subscribersController = require("./controllers/subscribersController.js"),
         usersController = require("./controllers/usersController.js"), //require usersController
-        coursesController = require("./controllers/coursesController.js"); //require coursesController
+        coursesController = require("./controllers/coursesController.js"), //require coursesController
+	passport = require("passport"),
+	passportLocalMongoose = require("passport-local-mongoose");
 
 
         mongoose.Promise = global.Promise; //using promise with Mongoose
@@ -143,10 +145,6 @@ router.use(expressSession({
 })); //configure express-session to use cookie-parse
 router.use(connectFlash()); //configure app to use connect-flash as middleware
 
-router.use((req, res, next) => {
-	res.locals.flashMessages = req.flash(); //assign flash messages to the local flashMessages variable on the response object
-	next();
-});
 
 
 //app.get("/", (req, res) => { // create a route for homepage
@@ -171,6 +169,25 @@ router.use(methodOverride("_method", {
 //add validation
 router.use(expressValidator());
 
+//initialze passport and configure passport to use sessions in express.js
+router.use(passport.initialize());
+router.use(passport.session());
+
+const User = require("./models/user"); // require user model
+passport.use(User.createStrategy());//configure user login strategy
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser()); //set up passport to serialize and deserialize user data
+
+//adding local variables to custom middleware
+router.use((req, res, next) => {
+        res.locals.loggedIn = req.isAuthenticated(); //set up logged in variable to reflect passport login status
+	res.locals.currentUser = req.user; //set up cuurent user to reflect logged in user
+	res.locals.flashMessages = req.flash(); //assign flash messages to the local flashMessages variable on the response object
+	
+	next();
+});
+
+
 router.get("/", homeController.index);
 //app.get("/contact", homeController.showSignup);
 //app.get("/contact", homeController.postedSignUpForm); //add routes for courses page, contact page, and contact form submission
@@ -183,10 +200,9 @@ router.get("/users/new", usersController.new);
 router.post("/users/create", usersController.validate, usersController.create, usersController.redirectView); //add validate middleware to users create route
 //login route
 router.get("/users/login", usersController.login); //add route to handle get requests made to /users/login path
-router.post("/users/login", usersController.authenticate, usersController.redirectView); //add route to handle post request to same path
-
-
-router.get("/users/:id", usersController.show, usersController.showView);
+router.post("/users/login", usersController.authenticate); //add route to handle post request to same path
+//log out
+router.get("/users/logout", usersController.logout, usersController.redirectView);
 
 //adding edit and update routes
 router.get("/users/:id/edit", usersController.edit); //add routes to handle viewing
@@ -194,6 +210,9 @@ router.put("/users/:id/update", usersController.update, usersController.redirect
 
 //deleting user
 router.delete("/users/:id/delete", usersController.delete, usersController.redirectView); 
+router.get("/users/:id", usersController.show, usersController.showView);
+
+
 
 router.get("/subscribers", subscribersController.index, subscribersController.indexView);
 router.get("/subscribers/new", subscribersController.new);

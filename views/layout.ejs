@@ -26,13 +26,22 @@
 				<span class="button">Contact</span>
 			</a>
 		</div>
-	</div>
+		<div class="login">
+			<% if (loggedIn) { %>
+			  <p>
+				  Logged in as <a href="<%`/users/${currentUser._id}`%>">
+					  <%= currentUser.fullName %></a>
 
-	<%- body %>
+			 
+			 <a href="/users/logout">Log out</a>
+			 </p>
+			 <%} else {%>
+			<a href="/users/login">Log In</a>
 
-</body>
+			 <%  } %>
 
-<div class="flashes">
+	       	</div>
+	<div class="flashes">
 	<% if (flashMessages) { %> 
 	<% if(flashMessages.success) {%>
 	<div class="flash success"><%= flashMessages.success %></div>
@@ -40,6 +49,12 @@
 	 <div class ="flash error"><%= flashMessages.error%></div>
 	 <% } %>
          <% } %>
-</div>
+        </div>
+
+        <div class="container">
+		<%- body %>
+	</div>
+
+</body>
 
 </html>

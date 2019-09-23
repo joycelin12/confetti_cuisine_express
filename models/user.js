@@ -3,6 +3,8 @@
 const Subscriber = require("./subscriber");
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose"),
+	 passportLocalMongoose = require("passport-local-mongoose"),
+  
 	{Schema} = mongoose,
 
 	userSchema = new Schema({
@@ -67,7 +69,7 @@ userSchema.pre("save", function(next) { //set up the pre ('save') hook
 	}
 
 });
-
+/*
 userSchema.pre("save", function(next) { //set up the pre ('save') hook
 
 	let user = this;
@@ -86,5 +88,11 @@ userSchema.methods.passwordComparison = function(inputPassword) { //add function
             let user = this;
 	    return bcrypt.compare(inputPassword, user.password); //compare user password with stored password
 };
+*/
+
+userSchema.plugin(passportLocalMongoose, {
+  usernameField: "email"
+});
+
 
 module.exports = mongoose.model("User", userSchema);

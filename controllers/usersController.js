@@ -1,6 +1,18 @@
 "use strict";
 
-const User = require("../models/user"); //require user model
+const User = require("../models/user"), //require user model
+	passport = require("passport"),
+	getUserParams = body => {
+		return  {
+		name: {
+			first: body.first,
+			last: body.last
+			},
+		email: body.email,
+	        password: body.password,
+	        zipCode: body.zipCode		
+		};
+	};
 
 /*
 module.exports = {
@@ -47,8 +59,24 @@ module.exports = {
           res.render("users/new"); //add new action to render form
 	},
 	create: (req, res, next) => {
+           
+           if (req.skip) next();
 
-           let userParams = { //add create action to save user to database
+	   let newUser = new User(getUserParams(req.body));
+
+		User.register(newUser, req.body.password, (error, user) => {
+                  if(user) {
+                    req.flash("success", `${user.fullName}'s account created successfully!`);
+			  res.locals.redirect ="/users";
+			  next();
+		  } else {
+                    req.flash("error", `Failed to create user account because: ${error.message}.`);
+			  res.locals.redirect = "/users/new";
+			  next();
+		  }
+   
+		});
+           /*let userParams = { //add create action to save user to database
 		   name: {
                       first: req.body.first,
 		      last: req.body.last
@@ -73,7 +101,7 @@ module.exports = {
 		      `Failed to create user account because: ${error.message}.`
 		   );
 			next();
-		});
+		});*/
 		
 	},
 
@@ -161,9 +189,22 @@ module.exports = {
             res.render("users/login");
 	},
 
-	authenticate: (req, res, next) => {
+	authenticate: passport.authenticate("local",  {
+           
+		failureRedirect: "/users/login",
+		failureFlash: "Failed to login.",
+		successRedirect: "/",
+		successFlash: "Logged in!"
+	}),
 
-           User.findOne({ //query for one user by email
+	logout: (req, res, next) => { //add an action to log users out
+             req.logout();
+		req.flash("success", "You have been logged out!");
+		res.locals.redirect ="/";
+		next();
+	},
+
+          /* User.findOne({ //query for one user by email
                 email: req.body.email
 	   })
 		.then(user => {
@@ -194,8 +235,8 @@ module.exports = {
 
                       console.log(`Error logging in user: ${error.message}`);
 			   next(error);
-		   });
-	},
+		   }); 	}, */
+		   
 	validate: (req, res, next) => { //add the validate function
 		req.sanitizeBody("email").normalizeEmail({
 			all_lowercase: true
