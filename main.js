@@ -6,13 +6,23 @@ const express = require("express"), //require express
 	errorController = require("./controllers/errorController"),
 	layouts = require("express-ejs-layouts"), //require express-ejs-layouts module
 	router  = express.Router(),  //add router object
+	expressValidator = require("express-validator"),
+   //     {check, validationResult, sanitizeBody} = require('express-validator'),
 	expressSession = require("express-session"), //require the 3 modules
         cookieParser = require("cookie-parser"),
 	connectFlash = require("connect-flash"),
-	mongoose = require("mongoose"); // require mongoose
+        mongoose = require("mongoose"), // require mongoose
+	Subscriber = require("./models/subscriber"),
+        subscribersController = require("./controllers/subscribersController.js"),
+        usersController = require("./controllers/usersController.js"), //require usersController
+        coursesController = require("./controllers/coursesController.js"); //require coursesController
+
+
         mongoose.Promise = global.Promise; //using promise with Mongoose
+
    
-               mongoose.connect(
+   
+        mongoose.connect(
 
          "mongodb://localhost:27017/recipe_db", //set up connection to db
 		{useNewUrlParser: true}
@@ -23,12 +33,7 @@ const express = require("express"), //require express
 
              });
  
-        const Subscriber = require("./models/subscriber");
-        const subscribersController = require("./controllers/subscribersController.js");
-        const usersController = require("./controllers/usersController.js"); //require usersController
-        const coursesController = require("./controllers/coursesController.js"); //require coursesController
-
-
+           /*
 
          var myQuery = Subscriber.findOne({
             name: "Jon Wexler"
@@ -40,7 +45,7 @@ const express = require("express"), //require express
 	 });
 
         
-      /*
+      
        const subscriberSchema = mongoose.Schema({ //create a new schema with mongoose.schema
 
           name: String, //add schema properties
@@ -124,7 +129,7 @@ router.use(
 
 router.use(express.json());
 router.use(express.static("public"));
-router.get("/", homeController.index);
+
 
 //configure your express.js application to use cookie-parse
 router.use(cookieParser("secret_passcode"));
@@ -143,6 +148,7 @@ router.use((req, res, next) => {
 	next();
 });
 
+
 //app.get("/", (req, res) => { // create a route for homepage
 
   // res.render("index");
@@ -155,7 +161,6 @@ router.use(methodOverride("_method", {
 	methods: ["POST", "GET"]
 })); //configure the application router to use methodOverride as middleware.
 
-
 /*router.get("/subscribers", subscribersController.getAllSubscribers, (req, res, next) => {  //pass reqyest to getAllSubscribers function.
 
               console.log(req.data);  //log data from request object
@@ -163,16 +168,10 @@ router.use(methodOverride("_method", {
 		 res.render("subscribers", {subscribers:req.data}); //render a view subscribers and pass from db to view
 	 });*/
 
+//add validation
+router.use(expressValidator());
 
-router.get("/courses", coursesController.index, coursesController.indexView);
-router.get("/courses/new", coursesController.new);
-router.post("/courses/create", coursesController.create, coursesController.redirectView);
-router.get("/courses/:id/edit", coursesController.edit);
-router.put("/courses/:id/update", coursesController.update, coursesController.redirectView);
-router.delete("/courses/:id/delete", coursesController.delete, coursesController.redirectView);
-router.get("/courses/:id", coursesController.show, coursesController.showView);
-
-
+router.get("/", homeController.index);
 //app.get("/contact", homeController.showSignup);
 //app.get("/contact", homeController.postedSignUpForm); //add routes for courses page, contact page, and contact form submission
 
@@ -181,7 +180,12 @@ router.get("/contact", homeController.getSubscriptionPage); //add get route for 
 router.get("/users", usersController.index, usersController.indexView);	// create index route
 
 router.get("/users/new", usersController.new);
-router.post("/users/create", usersController.create, usersController.redirectView);
+router.post("/users/create", usersController.validate, usersController.create, usersController.redirectView); //add validate middleware to users create route
+//login route
+router.get("/users/login", usersController.login); //add route to handle get requests made to /users/login path
+router.post("/users/login", usersController.authenticate, usersController.redirectView); //add route to handle post request to same path
+
+
 router.get("/users/:id", usersController.show, usersController.showView);
 
 //adding edit and update routes
@@ -211,6 +215,13 @@ router.delete(
 );
 router.get("/subscribers/:id", subscribersController.show, subscribersController.showView);
 
+router.get("/courses", coursesController.index, coursesController.indexView);
+router.get("/courses/new", coursesController.new);
+router.post("/courses/create", coursesController.create, coursesController.redirectView);
+router.get("/courses/:id/edit", coursesController.edit);
+router.put("/courses/:id/update", coursesController.update, coursesController.redirectView);
+router.delete("/courses/:id/delete", coursesController.delete, coursesController.redirectView);
+router.get("/courses/:id", coursesController.show, coursesController.showView);
 
 router.use(errorController.pageNotFoundError);
 router.use(errorController.internalServerError); //add error handlers as middleware functions.

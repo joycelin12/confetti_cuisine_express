@@ -155,6 +155,74 @@ module.exports = {
 			next();
 		
 	        });
-	}	
+	}, 
+	login: (req, res) => {
+
+            res.render("users/login");
+	},
+
+	authenticate: (req, res, next) => {
+
+           User.findOne({ //query for one user by email
+                email: req.body.email
+	   })
+		.then(user => {
+
+                   if(user) { //check whether user is found
+                        
+		       user.passwordComparison(req.body.password) //call the password comparison method on user model
+			   .then(passwordsMatch => {
+				   if(passwordsMatch) {
+
+                                        res.locals.redirect = `/users/${user._id}`;
+					req.flash("success", `${user.fullName}'s logged in successfully!`);
+                                        res.locals.user = user;
+				   } else {
+					req.flash("error", "Failed to log in user account: Incorrect password.");
+					   res.locals.redirect = "/users/login";
+				   }
+                       		       next();	   //call the next middleware function with redirect path and flash message set
+		     });		   
+		   } else {
+
+                       req.flash("error", "Failed to log in user account: User account not found.!");
+		       res.locals.redirect ="/users/login";
+		       next();	   
+		   }
+		})
+		   .catch(error => { //log errors to console and pass to next middleware error handler
+
+                      console.log(`Error logging in user: ${error.message}`);
+			   next(error);
+		   });
+	},
+	validate: (req, res, next) => { //add the validate function
+		req.sanitizeBody("email").normalizeEmail({
+			all_lowercase: true
+		}).trim(); //remove whitespace with the trim method
+
+		req.check("email", "Email is invalid").isEmail();
+		req.check("zipCode", "Zip code is invalid")
+			.notEmpty().isInt().isLength({
+				min: 5,
+				max: 5
+			}).equals(req.body.zipCode); //validate the zipCode field
+		req.check("password", "Password cannot be empty").notEmpty(); //validate the password field
+
+		req.getValidationResult().then(error => { //collect the results of previous validations
+
+			if(!error.isEmpty()) {
+				let messages = error.array().map(e =>e.msg); 
+				req.skip = true;// set skip property to true
+				req.flash("error", messages.join(" and ")); //add error messages as flash messages
+				res.locals.redirect = "/users/new"; // set redirect path for the new view
+				next();
+
+			} else {
+				next(); //call the next middleware function;
+			}
+			
+		});
+	}
    
 };
