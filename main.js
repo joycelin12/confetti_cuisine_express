@@ -2,20 +2,18 @@
 
 const express = require("express"), //require express
 	app = express(), //instantiate
-	homeController = require("./controllers/homeController"),
-	errorController = require("./controllers/errorController"),
-	layouts = require("express-ejs-layouts"), //require express-ejs-layouts module
-	router  = express.Router(),  //add router object
+//	homeController = require("./controllers/homeController"),
+//	errorController = require("./controllers/errorController"),
+        router  = require("./routes/index.js"),  //add router object
+	layouts = require("express-ejs-layouts"), //require express-ejs-layouts module	
 	expressValidator = require("express-validator"),
-   //     {check, validationResult, sanitizeBody} = require('express-validator'),
-	expressSession = require("express-session"), //require the 3 modules
+ 	expressSession = require("express-session"), //require the 3 modules
         cookieParser = require("cookie-parser"),
 	connectFlash = require("connect-flash"),
         mongoose = require("mongoose"), // require mongoose
 	Subscriber = require("./models/subscriber"),
-        subscribersController = require("./controllers/subscribersController.js"),
-        usersController = require("./controllers/usersController.js"), //require usersController
-        coursesController = require("./controllers/coursesController.js"), //require coursesController
+     //   subscribersController = require("./controllers/subscribersController.js"),
+      //  coursesController = require("./controllers/coursesController.js"), //require coursesController
 	passport = require("passport"),
 	passportLocalMongoose = require("passport-local-mongoose");
 
@@ -29,6 +27,12 @@ const express = require("express"), //require express
          "mongodb://localhost:27017/recipe_db", //set up connection to db
 		{useNewUrlParser: true}
 	);
+
+        mongoose.set("useCreateIndex", true);
+
+
+
+
         const  db = mongoose.connection; //assign db variable    
         db.once("open", () => {
            console.log("Successfully connected to MongoDB using Mongoose!");
@@ -118,24 +122,26 @@ MongoDB.connect(dbURL, (error, client) => { //set up a connection to your local 
 
 app.set("port", process.env.PORT || 3000);
 app.set("view engine", "ejs"); //set application to use ejs
-app.use("/", router);
-      
-router.use(layouts); // set application to use layout module
+app.use(express.static("public"));
+app.use(layouts); // set application to use layout module
 
-
-router.use(
+app.use(
    express.urlencoded({  //tell express.js app to use body parser for processing
       extended:false     //URL-encoded and json parameters
    })
 );
 
-router.use(express.json());
-router.use(express.static("public"));
+//adding method override to put in the put request 
+const methodOverride = require("method-override"); //require the method override module
+app.use(methodOverride("_method", {
+	methods: ["POST", "GET"]
+})); //configure the application router to use methodOverride as middleware.
 
 
+app.use(express.json());
 //configure your express.js application to use cookie-parse
-router.use(cookieParser("secret_passcode"));
-router.use(expressSession({
+app.use(cookieParser("secret_passcode"));
+app.use(expressSession({
 	secret: "secret_passcode",
 	cookie: {
 		maxAge: 4000000
@@ -143,21 +149,12 @@ router.use(expressSession({
 	resave: false,
 	saveUninitialized: false
 })); //configure express-session to use cookie-parse
-router.use(connectFlash()); //configure app to use connect-flash as middleware
-
-
 
 //app.get("/", (req, res) => { // create a route for homepage
 
   // res.render("index");
 
 //});
-
-//adding method override to put in the put request 
-const methodOverride = require("method-override"); //require the method override module
-router.use(methodOverride("_method", {
-	methods: ["POST", "GET"]
-})); //configure the application router to use methodOverride as middleware.
 
 /*router.get("/subscribers", subscribersController.getAllSubscribers, (req, res, next) => {  //pass reqyest to getAllSubscribers function.
 
@@ -166,20 +163,22 @@ router.use(methodOverride("_method", {
 		 res.render("subscribers", {subscribers:req.data}); //render a view subscribers and pass from db to view
 	 });*/
 
-//add validation
-router.use(expressValidator());
-
 //initialze passport and configure passport to use sessions in express.js
-router.use(passport.initialize());
-router.use(passport.session());
+app.use(passport.initialize());
+app.use(passport.session());
 
 const User = require("./models/user"); // require user model
 passport.use(User.createStrategy());//configure user login strategy
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser()); //set up passport to serialize and deserialize user data
 
+app.use(connectFlash()); //configure app to use connect-flash as middleware
+
+
+
+
 //adding local variables to custom middleware
-router.use((req, res, next) => {
+app.use((req, res, next) => {
         res.locals.loggedIn = req.isAuthenticated(); //set up logged in variable to reflect passport login status
 	res.locals.currentUser = req.user; //set up cuurent user to reflect logged in user
 	res.locals.flashMessages = req.flash(); //assign flash messages to the local flashMessages variable on the response object
@@ -187,64 +186,19 @@ router.use((req, res, next) => {
 	next();
 });
 
+//add validation
+app.use(expressValidator());
 
-router.get("/", homeController.index);
+
+app.use("/", router);
+      
+
+//router.get("/", homeController.index);
 //app.get("/contact", homeController.showSignup);
 //app.get("/contact", homeController.postedSignUpForm); //add routes for courses page, contact page, and contact form submission
 
-router.get("/contact", homeController.getSubscriptionPage); //add get route for subscription page
+//router.get("/contact", homeController.getSubscriptionPage); //add get route for subscription page
 //router.post("/subscribe", subscribersController.saveSubscriber); //add post route to handle subscription data
-router.get("/users", usersController.index, usersController.indexView);	// create index route
-
-router.get("/users/new", usersController.new);
-router.post("/users/create", usersController.validate, usersController.create, usersController.redirectView); //add validate middleware to users create route
-//login route
-router.get("/users/login", usersController.login); //add route to handle get requests made to /users/login path
-router.post("/users/login", usersController.authenticate); //add route to handle post request to same path
-//log out
-router.get("/users/logout", usersController.logout, usersController.redirectView);
-
-//adding edit and update routes
-router.get("/users/:id/edit", usersController.edit); //add routes to handle viewing
-router.put("/users/:id/update", usersController.update, usersController.redirectView); //process data from edit form, and display user show page.
-
-//deleting user
-router.delete("/users/:id/delete", usersController.delete, usersController.redirectView); 
-router.get("/users/:id", usersController.show, usersController.showView);
-
-
-
-router.get("/subscribers", subscribersController.index, subscribersController.indexView);
-router.get("/subscribers/new", subscribersController.new);
-router.post(
-  "/subscribers/create",
-  subscribersController.create,
-  subscribersController.redirectView
-);
-router.get("/subscribers/:id/edit", subscribersController.edit);
-router.put(
-  "/subscribers/:id/update",
-  subscribersController.update,
-  subscribersController.redirectView
-);
-router.delete(
-  "/subscribers/:id/delete",
-  subscribersController.delete,
-  subscribersController.redirectView
-);
-router.get("/subscribers/:id", subscribersController.show, subscribersController.showView);
-
-router.get("/courses", coursesController.index, coursesController.indexView);
-router.get("/courses/new", coursesController.new);
-router.post("/courses/create", coursesController.create, coursesController.redirectView);
-router.get("/courses/:id/edit", coursesController.edit);
-router.put("/courses/:id/update", coursesController.update, coursesController.redirectView);
-router.delete("/courses/:id/delete", coursesController.delete, coursesController.redirectView);
-router.get("/courses/:id", coursesController.show, coursesController.showView);
-
-router.use(errorController.pageNotFoundError);
-router.use(errorController.internalServerError); //add error handlers as middleware functions.
-
 
 app.listen(app.get("port"), () => {
 
