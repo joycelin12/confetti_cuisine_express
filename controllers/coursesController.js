@@ -1,6 +1,8 @@
 "use strict";
 
-const Course = require("../models/course");
+const Course = require("../models/course"),
+	httpStatus = require("http-status-codes"),
+	User = require("../models/user");
 
 module.exports = {
 
@@ -18,11 +20,11 @@ module.exports = {
 		       })
 	},
 	indexView: (req, res) =>{
-		if (req.query.format === "json") {
-                     res.json(res.locals.courses);
-		} else {
+	//	if (req.query.format === "json") {
+          //           res.json(res.locals.courses);
+	//	} else {
                       res.render("courses/index");
-		}
+	//	}
 	},
 	new: (req, res) => {
                 res.render("courses/new");
@@ -118,5 +120,71 @@ module.exports = {
              let redirectPath = res.locals.redirect;
 	     if(redirectPath != undefined) res.redirect(redirectPath);
 	     else next();	
+	},
+	respondJSON: (req, res) => { //handle request from prev middleware and submit response
+		res.json({
+                    status: httpStatus.OK,
+			data: res.locals
+		});
+
+        
+	},
+	errorJSON: (error, req, res, next) => {
+
+          let errorObject;
+		if(error) {
+                    errorObject = {
+			    status: httpStatus.INTERNAL_SERVER_ERROR,
+			    message: error.message
+                          
+		       };
+		    } else {
+
+                      errorObject = {
+                            status: httpStatus.INTERNAL_SERVER_ERROR,
+			      message: "Unknown Error"
+		      };
+		    }
+		res.json(errorObject);
+
+	}, 
+	join: (req, res, next) => { //add join action to let users join a course
+
+            let courseId = req.params.id, //get course id and current user from request
+			currentUser = req.user;
+
+		if(currentUser) {
+                      User.findByIdAndUpdate(currentUser, {
+                                $addToSet: {
+       					courses: courseId //update users courses field to contain targeted course
+				}
+		      })
+			.then(() => {
+                             res.locals.success = true; // respond with json object success indicator
+				next();
+			})
+			.catch(error => {
+                             next(error); //respond with Json error indicator
+			});
+		} else {
+			next(new Error("User must be log in.")); //pass an error through next middleware fuction
+		}
+	},
+	filterUserCourses: (req, res, next) => {
+ 	  let currentUser = res.locals.currentUser;
+		if(currentUser) {
+                    let mappedCourses = res.locals.courses.map((course) => { //modify course data to add flag indication user association
+			    let userJoined = currentUser.courses.some((userCourse) => {
+                               return userCourse.equals(course._id); // check whether course exists in users courses array
+			    });
+			    return Object.assign(course.toObject(), {joined: userJoined});
+ 
+		    });
+			res.locals.courses = mappedCourses;
+			next();
+
+		} else {
+                        next();
+		}
 	}
 };
