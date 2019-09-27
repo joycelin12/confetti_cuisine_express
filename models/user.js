@@ -2,6 +2,7 @@
 
 const Subscriber = require("./subscriber");
 const bcrypt = require("bcrypt");
+const randToken = require("rand-token");
 const mongoose = require("mongoose"),
 	 passportLocalMongoose = require("passport-local-mongoose"),
   
@@ -25,6 +26,9 @@ const mongoose = require("mongoose"),
                    required : true,
 		   lowercase: true,
 	           unique: true
+		},
+		apiToken:{
+                     type: String
 		},
 		zipCode: {
                     type: Number,
@@ -68,6 +72,13 @@ userSchema.pre("save", function(next) { //set up the pre ('save') hook
             next(); //call next functionif user already has an association
 	}
 
+});
+
+userSchema.pre("save", function(next) {
+
+    let user = this; // check for an existing API token and generate a new one with randtoken.generate
+	if(!user.apiToken) user.apiToken = randToken.generate(16);
+	next();
 });
 /*
 userSchema.pre("save", function(next) { //set up the pre ('save') hook

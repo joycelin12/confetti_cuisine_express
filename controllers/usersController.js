@@ -2,6 +2,7 @@
 
 const User = require("../models/user"), //require user model
 	passport = require("passport"),
+	token = process.env.TOKEN || "recipeT0k3n",
 	getUserParams = body => {
 		return  {
 		name: {
@@ -264,6 +265,25 @@ module.exports = {
 			}
 			
 		});
+	},
+	verifyToken: (req, res, next) => { //create verifytoken middleware function with next parameter
+		let token = req.query.apiToken; //check whether token exists as query parameter
+		if (token) {
+
+                    User.findOne({apiToken: token}) //search for a user with provided API token
+			.then(user => {
+                            if(user) next();
+				else next(new Error("Invalid API token"));
+			})
+			.catch(error => {
+                            next(new Error(error.message)); //pass error to error handler
+			});
+		} else {
+                        next(new Error("Invalid API Token"));
+		}
+		//if(req.query.apiToken === token) next(); // call next middleware if tokens match
+		//else next(new Error("Invalid API Token."));//respond with error message if tokens dont match 
+
 	}
    
 };

@@ -119,9 +119,10 @@ MongoDB.connect(dbURL, (error, client) => { //set up a connection to your local 
 }); */
 
 
-
 app.set("port", process.env.PORT || 3000);
 app.set("view engine", "ejs"); //set application to use ejs
+app.set("token", process.env.TOKEN || "recipeT0k3n");
+
 app.use(express.static("public"));
 app.use(layouts); // set application to use layout module
 
