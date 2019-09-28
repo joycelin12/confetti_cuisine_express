@@ -29,7 +29,10 @@ module.exports = {  //export object literal with all controller actions
         },
 	getSubscriptionPage: (req, res) => {
    		 res.render("contact");
-	 }
+	 },
+	chat: (req, res) => {
+		res.render("chat");
+	}
 
 
 

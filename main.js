@@ -201,8 +201,9 @@ app.use("/", router);
 //router.get("/contact", homeController.getSubscriptionPage); //add get route for subscription page
 //router.post("/subscribe", subscribersController.saveSubscriber); //add post route to handle subscription data
 
-app.listen(app.get("port"), () => {
+const server = app.listen(app.get("port"), () => {
 
    console.log(`Server running at http://localhost:${app.get("port")}`); //set up application up to listen on port 3000
-});
-
+}), //save server instance to server
+	io = require("socket.io")(server) ,// pass server instance to socket.io
+       chatController = require("./controllers/chatController")(io);
