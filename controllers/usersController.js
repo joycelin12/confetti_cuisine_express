@@ -2,6 +2,7 @@
 
 const User = require("../models/user"), //require user model
 	passport = require("passport"),
+	jsonWebToken = require("jsonwebtoken"),
 	token = process.env.TOKEN || "recipeT0k3n",
 	getUserParams = body => {
 		return  {
@@ -284,6 +285,67 @@ module.exports = {
 		//if(req.query.apiToken === token) next(); // call next middleware if tokens match
 		//else next(new Error("Invalid API Token."));//respond with error message if tokens dont match 
 
+	}, 
+	apiAuthenticate: (req, res, next) => { //authenticate with passport.authenticate method
+		passport.authenticate("local", (errors, user) => {
+
+                     if(user) {
+                        let signedToken = jsonWebToken.sign( //sign jwt if user exists with matching email and password
+				{
+                                  data:user._id,
+				   exp: new Date().setDate(new Date().getDate() +1)
+				},
+				"secret_encoding_passphrase"
+
+			);
+			     res.json({
+                                success: true,
+				token: signedToken //respondwith jwt
+			     });
+		     } else 
+			res.json({
+                             success: false,
+                             message: "Could not authenticate user." //respond with an error message				
+			});
+		})(req, res, next);
+
+
+	},
+	verifyJWT: (req, res, next ) => {
+            let token = req.headers.token; // retrieve jwt from request headers
+	    if(token) {
+		jsonWebToken.verify (
+		token,
+			"secret_encoding_passphrase",
+			(errors, payload) => {
+
+			 if (payload) {
+				User.findById(payload.data).then(user => {
+					if (user) {
+						next(); // call the next middleware function if a user is found with jwt id
+					} else {
+						res.status(httpStatus.FORBIDDEN).json({
+						 error:true,
+							message: "No User Account found."
+						});
+					}
+				});
+			 } else {
+				res.status(httpStatus.UNAUTHORIZED).json({
+					error: true,
+					message: "Cannot verify API token." // respond with error message if the token cant be verified
+				});
+				 next();
+			 }
+			}
+		);
+	    } else {
+		res.status(httpStatus.UNAUTHORIZED).json({
+
+			error: true,
+			message: "Provide Token" //respond with an error message if no token is found in request headers
+		});
+	    }
 	}
    
 };
