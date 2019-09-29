@@ -1,4 +1,47 @@
 $(document).ready(() => {
+
+	const socket = io(); //initialize socket.io on the client
+
+	$("#chatForm").submit(() => { //emit an event when form is submitted
+		let userName = $("#chat-user-name").val(), //pull user name		
+		    userId = $("#chat-user-id").val(), //pull hidden field from the form
+                	text = $("#chat-input").val(); //grab text from view input field
+		
+		socket.emit("message", {
+		   content: text,
+		   userName: userName,	
+		   userId: userId 
+		}); //emit form data to server
+		$("#chat-input").val("");
+			return false;
+
+	});
+
+	socket.on("message", (message)=> {
+
+		displayMessage(message); // listen for an event, and populate the chat box
+	});
+
+	let displayMessage = (message) => {
+	       	$("#chat").prepend($("<li>").html(  //display message from server in chatbox
+			
+                    `<strong class="message ${getCurrentUserClass(message.user)}">
+			${message.userName}
+		     </strong>: ${message.content}`) //display message contents along with user name in chatbox
+	//	`<div class="message ${getCurrentUserClass(message.user)}">
+	//	${message.content}
+	//	</div>`)
+             );
+			
+	};
+	let getCurrentUserClass = (id) =>{
+            let userId = $("#chat-user-id").val();
+		return userId === id ? "current-user": ""; //check whether message user id matches form user id 
+	};
+
+
+
+
 	$("#modal-button").click(() => { //listen for a click event on modal button
 		$(".modal-body").html(''); //clear modal from previous content
 		$.get("/api/courses", (results = {}) => { //request data from /courses?format=json async or api/courses

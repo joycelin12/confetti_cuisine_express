@@ -9,12 +9,28 @@ module.exports = io => { //export the chat controller contents
 		console.log("user disconnected");
 		});
 
-		client.on("message", () => { //listen for custom message event
+	/*	client.on("message", () => {
+                     io.emit("message", {
+                          content: "Hell0"
+		     });
+		});*/
 
-			io.emit("message", {
-				content: "Hello"
-			}); //broadcast a message to all connected users.
-		});
+		client.on("message", data => { //listen for custom message event
+
+		//	io.emit("message", {content: data.content});
+
+			let messageAttributes = {
+                             content: data.content,
+			     userName: data.userName,
+			     user: data.userId  // collect all incoming data	
+			};
+		        io.emit("message", messageAttributes); // emit message with userData
+			//io.emit("message", data => { //collect data as a parameter
+			//	content: data.content //return data in message event as content     
+			//}); //broadcast a message to all connected users.
+		
+		}); 
+		console.log("end of message");
 	});
 
 	

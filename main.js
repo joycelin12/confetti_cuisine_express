@@ -12,6 +12,8 @@ const express = require("express"), //require express
 	connectFlash = require("connect-flash"),
         mongoose = require("mongoose"), // require mongoose
 	Subscriber = require("./models/subscriber"),
+	User = require("./models/user"), // require user model
+
      //   subscribersController = require("./controllers/subscribersController.js"),
       //  coursesController = require("./controllers/coursesController.js"), //require coursesController
 	passport = require("passport"),
@@ -168,7 +170,6 @@ app.use(expressSession({
 app.use(passport.initialize());
 app.use(passport.session());
 
-const User = require("./models/user"); // require user model
 passport.use(User.createStrategy());//configure user login strategy
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser()); //set up passport to serialize and deserialize user data
@@ -205,5 +206,5 @@ const server = app.listen(app.get("port"), () => {
 
    console.log(`Server running at http://localhost:${app.get("port")}`); //set up application up to listen on port 3000
 }), //save server instance to server
-	io = require("socket.io")(server) ,// pass server instance to socket.io
-       chatController = require("./controllers/chatController")(io);
+	io = require("socket.io")(server);// pass server instance to socket.io
+        require("./controllers/chatController")(io);
