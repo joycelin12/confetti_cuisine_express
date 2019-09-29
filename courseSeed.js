@@ -10,7 +10,7 @@ const mongoose = require("mongoose"),
 
      );
      Course.remove({}) //remove all existing documents
-          .then(() =>
+          .then(() => {
 		  return Course.create({
 			  title: "Beets sitting at home",
 			  description: "Seasonal beets from the guy down the street.",
