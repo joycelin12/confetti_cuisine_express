@@ -13,6 +13,7 @@ const express = require("express"), //require express
         mongoose = require("mongoose"), // require mongoose
 	Subscriber = require("./models/subscriber"),
 	User = require("./models/user"), // require user model
+	morgan = require("morgan"), 
 
      //   subscribersController = require("./controllers/subscribersController.js"),
       //  coursesController = require("./controllers/coursesController.js"), //require coursesController
@@ -22,12 +23,15 @@ const express = require("express"), //require express
 
         mongoose.Promise = global.Promise; //using promise with Mongoose
 
-   
-   
+        if(process.env.NODE_ENV === "test") 
+	  mongoose.connect("mongodb://localhost:27017/recipe_test_db",
+		  {useNewUrlParser: true, useFindAndModify: false}
+	  );
+         else
         mongoose.connect(process.env.MONGODB_URI ||
 
          "mongodb://localhost:27017/recipe_db", //set up connection to db
-		{useNewUrlParser: true}
+		{useNewUrlParser: true , useFindAndModify: false}
 	);
 
         mongoose.set("useCreateIndex", true);
@@ -120,8 +124,11 @@ MongoDB.connect(dbURL, (error, client) => { //set up a connection to your local 
     
 }); */
 
+if (process.env.NODE_ENV === "test")
+	app.set("port", 3001);
+else app.set("port", process.env.PORT || 3000);
 
-app.set("port", process.env.PORT || 3000);
+
 app.set("view engine", "ejs"); //set application to use ejs
 app.set("token", process.env.TOKEN || "recipeT0k3n");
 
@@ -191,7 +198,7 @@ app.use((req, res, next) => {
 //add validation
 app.use(expressValidator());
 
-
+app.use(morgan("combined"));
 app.use("/", router);
       
 
@@ -208,3 +215,5 @@ const server = app.listen(app.get("port"), () => {
 }), //save server instance to server
 	io = require("socket.io")(server);// pass server instance to socket.io
         require("./controllers/chatController")(io);
+
+module.exports = app;

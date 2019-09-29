@@ -35,7 +35,7 @@ module.exports = {
 
 
 module.exports = {
-
+      getUserParams,
       index: (req, res, next) => {  
         User.find()  //run query in index action only 
 	     .then(users => {
