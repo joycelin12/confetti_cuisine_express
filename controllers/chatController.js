@@ -16,7 +16,7 @@ module.exports = io => { //export the chat controller contents
 
 
 		client.on("disconnect", () => { //listen for when user disconnects;
- 
+                client.broadcast.emit("user disconnected"); //broadcast a message to all other connected sockets
 		console.log("user disconnected");
 		});
 

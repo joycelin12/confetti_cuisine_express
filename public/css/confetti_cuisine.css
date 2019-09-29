@@ -244,3 +244,13 @@ button[type="submit"] {
   font-weight: bold;
   color: #3d41b4;
 }
+
+.chat-icon {
+  position: absolute;
+  left: 20px;
+  font-size: 25px;
+  top: 0px;
+  width: 25px;
+  color: #fff;
+  background: #ee3114;
+}

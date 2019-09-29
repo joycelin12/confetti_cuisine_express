@@ -21,6 +21,9 @@ $(document).ready(() => {
 	socket.on("message", (message)=> {
 
 		displayMessage(message); // listen for an event, and populate the chat box
+		for (let i =0; i <2; i++) {
+                   $(".chat-icon").fadeOut(200).fadeIn(200); //animate chat icon to glash when message sent
+		}
 	});
 
 	socket.on("load all messages", data => { //handle "load all messages" by parsing incoming data
@@ -46,6 +49,13 @@ $(document).ready(() => {
             let userId = $("#chat-user-id").val();
 		return userId === id ? "current-user": ""; //check whether message user id matches form user id 
 	};
+	socket.on("user disconnected", () => { //listen for user disconnect event and display custom message
+
+            displayMessage({
+                userName: "Notice",
+		content: "User left the chat"    
+	    });
+	});
 
 
 
