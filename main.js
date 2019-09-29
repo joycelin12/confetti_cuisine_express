@@ -24,7 +24,7 @@ const express = require("express"), //require express
 
    
    
-        mongoose.connect(
+        mongoose.connect(process.env.MONGODB_URI ||
 
          "mongodb://localhost:27017/recipe_db", //set up connection to db
 		{useNewUrlParser: true}
