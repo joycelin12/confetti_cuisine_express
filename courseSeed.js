@@ -40,7 +40,7 @@ const mongoose = require("mongoose"),
 	  })
           .then(course => console.log(course.title))
           .catch(error => console.log(error.message))
-          .then(() => 
+          .then(() => {
 		  console.log("DONE");
 		  mongoose.connection.close();
 	   });
