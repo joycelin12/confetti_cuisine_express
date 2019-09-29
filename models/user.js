@@ -1,7 +1,7 @@
 "use strict";
 
 const Subscriber = require("./subscriber");
-const bcrypt = require("bcrypt");
+//const bcrypt = require("bcrypt");
 const randToken = require("rand-token");
 const mongoose = require("mongoose"),
 	 passportLocalMongoose = require("passport-local-mongoose"),
