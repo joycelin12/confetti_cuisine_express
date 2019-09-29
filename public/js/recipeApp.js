@@ -17,10 +17,18 @@ $(document).ready(() => {
 
 	});
 
+
 	socket.on("message", (message)=> {
 
 		displayMessage(message); // listen for an event, and populate the chat box
 	});
+
+	socket.on("load all messages", data => { //handle "load all messages" by parsing incoming data
+             data.forEach(message => {
+                      displayMessage(message);// send each message to display Message to display in chat box
+	     });
+	});
+
 
 	let displayMessage = (message) => {
 	       	$("#chat").prepend($("<li>").html(  //display message from server in chatbox
